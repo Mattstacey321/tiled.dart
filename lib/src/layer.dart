@@ -138,9 +138,7 @@ abstract class Layer {
         Chunk parseChunk(Parser e) => Chunk.parse(e, encoding, compression);
         final chunks = parser.getChildrenAs('chunks', parseChunk) +
             (dataNode?.getChildrenAs('chunk', parseChunk) ?? []);
-        final data = dataNode != null
-            ? parseLayerData(dataNode, encoding, compression)
-            : null;
+        final data = dataNode != null ? parseLayerData(dataNode, encoding, compression) : null;
         layer = TileLayer(
           id: id,
           name: name,
@@ -274,7 +272,11 @@ abstract class Layer {
     }
 
     if (encoding == FileEncoding.csv) {
-      return (data as List).cast<int>();
+      try {
+        return (data as List).cast<int>();
+      } catch (e) {
+        return (data as String).split(',').map(int.parse).toList().cast<int>();
+      }
     }
     // Ok, its base64
     final trim = data.toString().replaceAll('\n', '').trim();
